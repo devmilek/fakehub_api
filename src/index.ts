@@ -2,11 +2,13 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import home from "./routes/home";
 import products from "./routes/products";
+import { requestLogger } from "./middleware/logging";
+
 
 const app = new Hono();
 
 // Middleware
-app.use("*", logger());
+app.use("*", requestLogger);
 
 // Routes
 app.route("/", home);
