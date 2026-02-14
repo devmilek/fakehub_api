@@ -1,21 +1,14 @@
-FROM oven/bun:1 AS base
+FROM oven/bun:latest AS base
 WORKDIR /app
 
-# Install dependencies (cache layer)
 COPY package.json bun.lock* ./
 RUN bun install --frozen-lockfile --production
 
-# Copy source
-COPY src/ ./src/
+COPY src ./src
 
-# Expose port
-ENV PORT=3000
-EXPOSE 3000
+ENV PORT=8080
+ENV NODE_ENV=production
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+EXPOSE 8080
 
-# Run
-USER bun
 CMD ["bun", "run", "src/index.ts"]
