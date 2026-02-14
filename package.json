@@ -1,0 +1,22 @@
+{
+  "name": "fakehub_api",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "start": "bun run src/index.ts",
+    "test": "bun test",
+    "test:ci": "bun test --reporter=junit --reporter-outfile=test-results.xml"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.9"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.3.0",
+    "hono": "^4.11.9"
+  }
+}
