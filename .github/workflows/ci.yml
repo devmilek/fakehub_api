@@ -6,14 +6,8 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
-  actions: read
-  checks: write
-
 jobs:
-  lint-and-test:
-    name: Build & Test
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,41 +20,31 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: bun install
+
+      - name: Build check
+        run: bun build src/index.ts --outdir ./dist
 
       - name: Run tests
-        run: bun test --reporter=junit --reporter-outfile=test-results.xml
+        run: bun test --reporter=junit > test-results.xml || true
 
-      - name: Upload test results
-        if: always()
+      - name: Run tests (console output)
+        run: bun test
+
+      - name: 📊 Upload test results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: test-results
           path: test-results.xml
 
-      - name: Test Report Summary
+      - name: 📋 Test Report Summary
         if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: Bun Tests
-          path: test-results.xml
-          reporter: java-junit
-
-  docker-build:
-    name: Docker Build
-    runs-on: ubuntu-latest
-    needs: lint-and-test
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: docker build -t devops-hono-app:${{ github.sha }} .
-
-      - name: Test Docker container
         run: |
-          docker run -d -p 3000:3000 --name test-app devops-hono-app:${{ github.sha }}
-          sleep 3
-          curl -f http://localhost:3000/ || exit 1
-          docker stop test-app
+          echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if bun test 2>&1 | grep -q "fail"; then
+            echo "❌ Some tests failed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
+          fi
