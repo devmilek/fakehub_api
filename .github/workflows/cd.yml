@@ -46,7 +46,6 @@ jobs:
       - name: Create deployment package
         run: |
           echo "APP_VERSION=${{ steps.version.outputs.version }}" >> .env
-          # ZMIANA: Dodano "node_modules/*" do wykluczeń
           zip -r deploy.zip . -x ".git/*" ".github/*" "tests/*" "*.md" ".env.example" "node_modules/*"
 
       - name: Deploy to Azure Web App
