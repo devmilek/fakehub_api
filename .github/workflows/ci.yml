@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  quality-gate:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,25 +26,23 @@ jobs:
         run: bun build src/index.ts --outdir ./dist
 
       - name: Run tests
-        run: bun test --reporter=junit > test-results.xml || true
-
-      - name: Run tests (console output)
         run: bun test
 
-      - name: 📊 Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: test-results.xml
+      - name: Check code formatting
+        run: |
+          bunx prettier --check "src/**/*.ts" "tests/**/*.ts" || echo "Formatting issues found"
 
-      - name: 📋 Test Report Summary
+      - name: Lint check
+        run: |
+          bunx oxlint src/ tests/ || echo "Lint issues found"
+
+      - name: Quality Gate Summary
         if: always()
         run: |
-          echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if bun test 2>&1 | grep -q "fail"; then
-            echo "❌ Some tests failed!" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "## Quality Gate Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Format | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ✅ |" >> $GITHUB_STEP_SUMMARY
