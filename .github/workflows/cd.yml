@@ -36,14 +36,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install
-
       - name: Generate version
         id: version
         run: |
@@ -54,7 +46,8 @@ jobs:
       - name: Create deployment package
         run: |
           echo "APP_VERSION=${{ steps.version.outputs.version }}" >> .env
-          zip -r deploy.zip . -x ".git/*" ".github/*" "tests/*" "*.md" ".env.example"
+          # ZMIANA: Dodano "node_modules/*" do wykluczeń
+          zip -r deploy.zip . -x ".git/*" ".github/*" "tests/*" "*.md" ".env.example" "node_modules/*"
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
