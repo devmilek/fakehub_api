@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import home from "./routes/home";
+import people from "./routes/people";
 import products from "./routes/products";
 import { requestLogger } from "./middleware/logging";
 
@@ -12,6 +13,7 @@ app.use("*", requestLogger);
 
 // Routes
 app.route("/", home);
+app.route("/people", people);
 app.route("/products", products);
 
 const port = parseInt(process.env.PORT || "3000");
